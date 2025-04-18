@@ -17,6 +17,7 @@
 #include "esp_wifi_default.h"
 #include "esp_wifi_types_generic.h"
 #include "freertos/idf_additions.h"
+#include "http_server.h"
 #include "lwip/sockets.h"
 #include "portmacro.h"
 #include "rgb_led.h"
@@ -185,7 +186,7 @@ static void wifi_app_task(void *pvParamters)
             {
             case WIFI_APP_MSG_START_HTTP_SERVER:
                 ESP_LOGI(TAG, "WIFI_APP_MSG_START_HTTP_SERVER");
-                // http_server_start();
+                start_http_server();
                 rgb_led_http_server_started();
                 break;
 

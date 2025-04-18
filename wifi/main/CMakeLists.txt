@@ -1,10 +1,11 @@
+file(GLOB_RECURSE COMPONENT_SRCS "src/*.c")
+file(GLOB_RECURSE WEB_FILES "webpage/*")
+
 idf_component_register(
-    SRCS
-        "src/main.c"
-        "src/wifi.c"
-        "src/rgb_led.c"
+    SRCS ${COMPONENT_SRCS}
     INCLUDE_DIRS
         "."
         "include"
+    EMBED_FILES ${WEB_FILES}
 )
 
