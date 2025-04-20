@@ -237,7 +237,6 @@ function showPassword() {
  */
 function getConnectInfo() {
     $.getJSON('/wifiConnectInfo.json', function(data) {
-        console.log(data);
         $("#connected_ap_label").html("Connected to: ");
         $("#connected_ap").text(data["ap"]);
 
