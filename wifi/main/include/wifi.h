@@ -2,6 +2,7 @@
 #define WIFI_H
 
 #include "esp_netif.h"
+#include "esp_wifi_types_generic.h"
 #include <freertos/FreeRTOS.h>
 
 // AP Name
@@ -43,7 +44,8 @@ extern esp_netif_t *esp_netif_ap;
 typedef enum wifi_app_message {
     WIFI_APP_MSG_START_HTTP_SERVER = 0,
     WIFI_APP_MSG_CONNECTING_HTTP_SERVER,
-    WIFI_APP_MSG_STA_CONNECTED_GOT_IP
+    WIFI_APP_MSG_STA_CONNECTED_GOT_IP,
+    WIFI_APP_MSG_STA_DISCONNECTED
 } wifi_app_message_e;
 
 /*
@@ -64,5 +66,10 @@ BaseType_t wifi_app_send_message(wifi_app_message_e msgID);
  * Starts the wifi RTOs task
  */
 void wifi_app_start(void);
+
+/*
+ * Get wifi config
+ */
+wifi_config_t *wifi_get_config(void);
 
 #endif

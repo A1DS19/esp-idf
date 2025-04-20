@@ -7,10 +7,13 @@
 #include <freertos/task.h>
 #include <lwip/netdb.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "esp_event.h"
 #include "esp_event_base.h"
+#include "esp_interface.h"
 #include "esp_log_level.h"
 #include "esp_netif.h"
 #include "esp_netif_types.h"
@@ -32,6 +35,16 @@ static QueueHandle_t wifi_app_queue_handle;
 // netif objects for the station and access point
 esp_netif_t *esp_netif_sta = NULL;
 esp_netif_t *esp_netif_ap = NULL;
+
+/*
+ * Used for returning wifi config
+ */
+wifi_config_t *wifi_config = NULL;
+
+/*
+ * Used to track number of retries when connection attempt fails
+ */
+static int g_retry_number;
 
 /*
  * WIFI application event handler
@@ -66,6 +79,19 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
             break;
         case WIFI_EVENT_STA_DISCONNECTED:
             ESP_LOGI(TAG, "WIFI_EVENT_STA_DISCONNECTED");
+            wifi_event_sta_disconnected_t *wifi_event_sta_disconnected =
+                (wifi_event_sta_disconnected_t *)malloc(sizeof(wifi_event_sta_disconnected_t));
+            *wifi_event_sta_disconnected = *((wifi_event_sta_disconnected_t *)event_data);
+            printf("WIFI_EVENT_STA_DISCONNECTED, reason code %d\n", wifi_event_sta_disconnected->reason);
+            if (g_retry_number < MAX_CONNECTION_RETRIES)
+            {
+                esp_wifi_connect();
+                g_retry_number += 1;
+            }
+            else
+            {
+                wifi_app_send_message(WIFI_APP_MSG_STA_DISCONNECTED);
+            }
             break;
         }
     }
@@ -75,6 +101,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
         {
         case IP_EVENT_STA_GOT_IP:
             ESP_LOGI(TAG, "IP_EVENT_STA_GOT_IP");
+            wifi_app_send_message(WIFI_APP_MSG_STA_CONNECTED_GOT_IP);
             break;
         }
     }
@@ -156,6 +183,15 @@ void wifi_app_soft_ap_config(void)
 }
 
 /*
+ * Connects ESP32 to external access point using updated station configuration
+ */
+static void wifi_connect_sta(void)
+{
+    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_get_config()));
+    ESP_ERROR_CHECK(esp_wifi_connect());
+}
+
+/*
  * Main task for the wifi application
  * @param pvParameters parameter which can be passed to the task
  */
@@ -192,11 +228,27 @@ static void wifi_app_task(void *pvParamters)
 
             case WIFI_APP_MSG_CONNECTING_HTTP_SERVER:
                 ESP_LOGI(TAG, "WIFI_APP_MSG_CONNECTING_HTTP_SERVER");
+
+                // attemp connection
+                wifi_connect_sta();
+
+                // set retries to 0
+                g_retry_number = 0;
+
+                // let http_server_know of connection attempt
+                http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_INIT);
+
                 break;
 
             case WIFI_APP_MSG_STA_CONNECTED_GOT_IP:
                 ESP_LOGI(TAG, "WIFI_APP_MSG_STA_CONNECTED_GOT_IP");
                 rgb_led_wifi_connected();
+                http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_SUCCESS);
+                break;
+
+            case WIFI_APP_MSG_STA_DISCONNECTED:
+                ESP_LOGI(TAG, "WIFI_APP_MSG_STA_DISCONNECTED");
+                http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_FAIL);
                 break;
 
             default:
@@ -219,6 +271,10 @@ void wifi_app_start(void)
     rgb_led_wifi_app_started();
     esp_log_level_set("wifi", ESP_LOG_NONE);
 
+    // allocate memory for wifi config
+    wifi_config = (wifi_config_t *)malloc(sizeof(wifi_config_t));
+    memset(wifi_config, 0, sizeof(wifi_config_t));
+
     // create message queue
     wifi_app_queue_handle = xQueueCreate(3, sizeof(wifi_app_queue_message_t));
 
@@ -230,4 +286,9 @@ void wifi_app_start(void)
                             WIFI_APP_TASK_PRIORITY,
                             NULL,
                             WIFI_APP_TASK_CORE_ID);
+}
+
+wifi_config_t *wifi_get_config(void)
+{
+    return wifi_config;
 }

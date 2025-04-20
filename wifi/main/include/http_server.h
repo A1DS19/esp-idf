@@ -6,6 +6,16 @@
 #define OTA_UPDATE_FAILED -1
 
 /*
+ * Connection status for wifi
+ */
+typedef enum http_server_wifi_connect_status{
+    NONE = 0,
+    HTTP_WIFI_STATUS_CONNECTING,
+    HTTP_WIFI_STATUS_CONNECT_FAIL,
+    HTTP_WIFI_STATUS_CONNECT_SUCCESS
+} http_server_wifi_connect_status_e;
+
+/*
  * Messages for the http monitor
  */
 #include "portmacro.h"
