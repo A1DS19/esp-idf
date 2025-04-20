@@ -1,6 +1,7 @@
 #include <nvs_flash.h>
 #include <wifi.h>
 
+#include "dht11.h"
 #include "esp_err.h"
 #include "nvs.h"
 
@@ -16,4 +17,5 @@ void app_main(void)
     ESP_ERROR_CHECK(ret);
 
     wifi_app_start();
+    DHT11_task_start();
 }
