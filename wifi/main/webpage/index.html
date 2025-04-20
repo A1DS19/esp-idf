@@ -16,7 +16,7 @@
 
 	<div id="OTA">
 	<h2>ESP32 Firmware Update</h2>
-		<label id="latest_firmware_label">Latest Firmware OTA: </label>
+		<label id="latest_firmware_label">Latest Firmware: </label>
 		<div id="latest_firmware"></div>
 		<input type="file" id="selected_file" accept=".bin" style="display: none;" onchange="getFileInfo()" />
 		<div class="buttons">
@@ -28,7 +28,7 @@
 	</div>
 	<hr>
 
-    	<div id="DHT22Sensor">
+	<div id="DHT11Sensor">
 		<h2>DHT22 Sensor Readings</h2>
 		<label for="temperature_reading">Temperature: </label>
 		<div id="temperature_reading"></div>
@@ -37,7 +37,7 @@
 	</div>
 	<hr>
 
-    	<div id="WiFiConnect">
+	<div id="WiFiConnect">
 		<h2>ESP32 WiFi Connect</h2>
 		<section>
 			<input id="connect_ssid" type="text" maxlength="32" placeholder="SSID" value="">
@@ -50,5 +50,19 @@
 		<div id="wifi_connect_credentials_errors"></div>
 		<h4 id="wifi_connect_status"></h4>
 	</div>
+
+	<div id="ConnectInfo">
+		<section>
+			<div id="connected_ap_label"></div> <div id="connected_ap"></div>
+		</section>
+		<div id="ip_address_label"></div> <div id="wifi_connect_ip"></div>
+		<div id="netmask_label"></div> <div id="wifi_connect_netmask"></div>
+		<div id="gateway_label"></div> <div id="wifi_connect_gw"></div>
+		<div class="buttons">
+			<input id="disconnect_wifi" type="button" value="Disconnect" />
+		</div>
+	</div>
+	<hr>
+
 	</body>
 <html>

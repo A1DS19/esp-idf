@@ -11,8 +11,12 @@ var wifiConnectInterval = null;
 $(document).ready(function() {
     getUpdateStatus();
     startDHTSensorInterval();
+    getConnectInfo();
     $("#connect_wifi").on("click", function() {
         checkCredentials();
+    });
+    $("#disconnect_wifi").on("click", function() {
+        disconnectWifi();
     });
 });
 
@@ -155,6 +159,7 @@ function getWifiConnectStatus() {
         else if (response.wifi_connect_status == 3) {
             document.getElementById("wifi_connect_status").innerHTML = "<h4 class='gr'>Connection Success!</h4>";
             stopWifiConnectStatusInterval();
+            getConnectInfo();
         }
     }
 }
@@ -225,4 +230,41 @@ function showPassword() {
     else {
         x.type = "password";
     }
+}
+
+/**
+ * Gets the connection information for displaying on the web page.
+ */
+function getConnectInfo() {
+    $.getJSON('/wifiConnectInfo.json', function(data) {
+        console.log(data);
+        $("#connected_ap_label").html("Connected to: ");
+        $("#connected_ap").text(data["ap"]);
+
+        $("#ip_address_label").html("IP Address: ");
+        $("#wifi_connect_ip").text(data["ip"]);
+
+        $("#netmask_label").html("Netmask: ");
+        $("#wifi_connect_netmask").text(data["netmask"]);
+
+        $("#gateway_label").html("Gateway: ");
+        $("#wifi_connect_gw").text(data["gw"]);
+
+        document.getElementById('disconnect_wifi').style.display = 'block';
+    });
+}
+
+/**
+ * Disconnects Wifi once the disconnect button is pressed and reloads the web page.
+ */
+function disconnectWifi() {
+    $.ajax({
+        url: '/wifiDisconnect.json',
+        dataType: 'json',
+        method: 'DELETE',
+        cache: false,
+        data: { 'timestamp': Date.now() }
+    });
+    // Update the web page
+    setTimeout("location.reload(true);", 2000);
 }
