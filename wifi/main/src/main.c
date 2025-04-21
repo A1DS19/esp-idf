@@ -4,6 +4,7 @@
 #include "dht11.h"
 #include "esp_err.h"
 #include "nvs.h"
+#include "wifi_reset_button.h"
 
 void app_main(void)
 {
@@ -17,5 +18,8 @@ void app_main(void)
     ESP_ERROR_CHECK(ret);
 
     wifi_app_start();
+
+    wifi_reset_button_config();
+
     DHT11_task_start();
 }

@@ -54,6 +54,7 @@ static EventGroupHandle_t wifi_event_group;
 const int WIFI_APP_CONNECTING_USING_SAVED_CREDS_BIT = BIT0;
 const int WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT = BIT1;
 const int WIFI_APP_USER_REQUESTED_STA_DISONNECT_BIT = BIT2;
+const int WIFI_APP_STA_CONNECTED_GOT_IP_BIT = BIT3;
 
 /*
  * WIFI application event handler
@@ -269,6 +270,8 @@ static void wifi_app_task(void *pvParamters)
 
             case WIFI_APP_MSG_STA_CONNECTED_GOT_IP:
                 ESP_LOGI(TAG, "WIFI_APP_MSG_STA_CONNECTED_GOT_IP");
+                xEventGroupSetBits(wifi_event_group, WIFI_APP_STA_CONNECTED_GOT_IP_BIT);
+
                 rgb_led_wifi_connected();
                 http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_SUCCESS);
                 event_bits = xEventGroupGetBits(wifi_event_group);
@@ -326,16 +329,26 @@ static void wifi_app_task(void *pvParamters)
                     // adust case, keep trying to connect, etc
                 }
 
+                if (event_bits & WIFI_APP_STA_CONNECTED_GOT_IP_BIT)
+                {
+                    xEventGroupClearBits(wifi_event_group, WIFI_APP_STA_CONNECTED_GOT_IP_BIT);
+                }
+
                 break;
 
             case WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT:
                 ESP_LOGI(TAG, "WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT");
-                xEventGroupSetBits(wifi_event_group, WIFI_APP_USER_REQUESTED_STA_DISONNECT_BIT);
-                g_retry_number = MAX_CONNECTION_RETRIES;
-                ESP_ERROR_CHECK(esp_wifi_disconnect());
-                app_nvs_clear_sta_creds();
-                // rename to a more meaninful name when there is not a wifi connection
-                rgb_led_http_server_started();
+                event_bits = xEventGroupGetBits(wifi_event_group);
+                if (event_bits & WIFI_APP_STA_CONNECTED_GOT_IP_BIT)
+                {
+                    xEventGroupSetBits(wifi_event_group, WIFI_APP_USER_REQUESTED_STA_DISONNECT_BIT);
+                    g_retry_number = MAX_CONNECTION_RETRIES;
+                    ESP_ERROR_CHECK(esp_wifi_disconnect());
+                    app_nvs_clear_sta_creds();
+                    // rename to a more meaninful name when there is not a wifi
+                    // connection
+                    rgb_led_http_server_started();
+                }
 
             default:
                 break;
