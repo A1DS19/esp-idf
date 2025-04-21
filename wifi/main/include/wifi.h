@@ -5,6 +5,10 @@
 #include "esp_wifi_types_generic.h"
 #include <freertos/FreeRTOS.h>
 
+
+// callback typedef
+typedef void (*wifi_connected_event_callback_t)(void);
+
 // AP Name
 #define WIFI_AP_SSID "ESP32_AP"
 // AP Password
@@ -73,5 +77,15 @@ void wifi_app_start(void);
  * Get wifi config
  */
 wifi_config_t *wifi_get_config(void);
+
+/*
+ * Sets callback
+ */
+void wifi_set_callback(wifi_connected_event_callback_t cb);
+
+/*
+ *Calls callback
+ */
+void wifi_call_callback(void);
 
 #endif

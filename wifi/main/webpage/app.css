@@ -1,3 +1,5 @@
+
+
 body {
     background-color: #f1f1f1;
     font-family: HelveticaNeueRegular, HelveticaNeue-Regular, "Helvetica Neue Regular", HelveticaNeue, "Helvetica Neue", Helvetica, Arial;
@@ -33,6 +35,11 @@ h4 {
 }
 .rd {
 	color: red;
+}
+
+#local_time {
+	display:inline;
+	color: #1d3557;
 }
 
 #latest_firmware, #latest_firmware_label {

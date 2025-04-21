@@ -56,6 +56,9 @@ const int WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT = BIT1;
 const int WIFI_APP_USER_REQUESTED_STA_DISONNECT_BIT = BIT2;
 const int WIFI_APP_STA_CONNECTED_GOT_IP_BIT = BIT3;
 
+// wifi callback
+static wifi_connected_event_callback_t wifi_connected_event_cb;
+
 /*
  * WIFI application event handler
  * @param arg data, aside from event data, that is passed when it is called
@@ -294,6 +297,13 @@ static void wifi_app_task(void *pvParamters)
                 {
                     xEventGroupClearBits(wifi_event_group, WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT);
                 }
+
+                // check for callback
+                if (wifi_connected_event_cb)
+                {
+                    wifi_call_callback();
+                }
+
                 break;
 
             case WIFI_APP_MSG_STA_DISCONNECTED:
@@ -393,4 +403,14 @@ void wifi_app_start(void)
 wifi_config_t *wifi_get_config(void)
 {
     return wifi_config;
+}
+
+void wifi_set_callback(wifi_connected_event_callback_t cb)
+{
+    wifi_connected_event_cb = cb;
+}
+
+void wifi_call_callback(void)
+{
+    wifi_connected_event_cb();
 }
