@@ -374,6 +374,15 @@ BaseType_t wifi_app_send_message(wifi_app_message_e msgID)
     return xQueueSend(wifi_app_queue_handle, &msg, portMAX_DELAY);
 }
 
+int8_t wifi_get_rssi(void)
+{
+    wifi_ap_record_t wifi_data;
+
+    ESP_ERROR_CHECK(esp_wifi_sta_get_ap_info(&wifi_data));
+
+    return wifi_data.rssi;
+}
+
 void wifi_app_start(void)
 {
     ESP_LOGI(TAG, "STARTING WIFI APPLICATION");

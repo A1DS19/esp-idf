@@ -2,6 +2,7 @@
 #include <nvs_flash.h>
 #include <wifi.h>
 
+#include "aws_iot.h"
 #include "dht11.h"
 #include "esp_err.h"
 #include "nvs.h"
@@ -14,6 +15,7 @@ void wifi_connected_events(void)
 {
     ESP_LOGI(TAG, "wifi application connected");
     sntp_time_sync_task_start();
+    aws_iot_start();
 }
 
 void app_main(void)

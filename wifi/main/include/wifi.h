@@ -4,6 +4,7 @@
 #include "esp_netif.h"
 #include "esp_wifi_types_generic.h"
 #include <freertos/FreeRTOS.h>
+#include <stdint.h>
 
 
 // callback typedef
@@ -87,5 +88,10 @@ void wifi_set_callback(wifi_connected_event_callback_t cb);
  *Calls callback
  */
 void wifi_call_callback(void);
+
+/*
+ * Get RSSI from wifi data
+ */
+int8_t wifi_get_rssi(void);
 
 #endif
